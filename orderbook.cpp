@@ -21,17 +21,36 @@ float_t Orderbook::spread() const {
 
 void Orderbook::fillOrder(Order &order, PriceLevel &level) {
   Order &front = level.orders.front();
+
+  Trade trade{};
+  trade.makerSide = front.side;
+  trade.takerSide = order.side;
+  trade.qty = std::min(front.qty, order.qty);
+  trade.price = *front.price;
+  trade.ts = std::chrono::system_clock::now();
+  trades.push_back(trade);
+
   // Order qty > first level qty
   if (order.qty >= front.qty) {
     order.qty -= front.qty;
     level.qty -= front.qty;
     level.orders.pop_front();
   } else { // Order qty < first level qty
+
     front.qty -= order.qty;
     level.qty -= order.qty;
     order.qty = 0;
   }
 }
+
+void Orderbook::logTrade() const {
+  if (!trades.empty()) {
+    Trade recent = trades.back();
+    std::cout << recent.makerSide << recent.takerSide << recent.qty
+              << recent.price << recent.ts << "\n";
+  }
+}
+
 void Orderbook::matchOrders(Order &order) {
   if (order.o_type == OType::MKT) {
     if (order.side == 'b') {
@@ -39,7 +58,8 @@ void Orderbook::matchOrders(Order &order) {
         auto best =
             asks.begin(); // bestAsks/Bids was being called once in fillOrder
                           // and then again in the if statement to erase the
-                          // level, causing the orderbook to cascaade
+                          // level, causing the orderbook to cascaade since the
+                          // level changed
         fillOrder(order, best->second);
         if (best->second.qty == 0) {
           asks.erase(best);
@@ -68,7 +88,7 @@ void Orderbook::matchOrders(Order &order) {
         auto best = bids.begin();
         fillOrder(order, best->second);
         if (best->second.qty == 0) {
-          bids.erase(bestBid());
+          bids.erase(best);
         }
       }
     }

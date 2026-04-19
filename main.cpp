@@ -20,12 +20,15 @@ int main() {
     if (GetTime() - lastOrderTime >= orderInterval) {
       Order order = generateOrder();
       orderbook.addOrder(order);
+
+      orderbook.logTrade();
       lastOrderTime = GetTime();
     }
 
     BeginDrawing();
     ClearBackground(BLACK);
     orderbook.print();
+
     EndDrawing();
   }
   CloseWindow();
