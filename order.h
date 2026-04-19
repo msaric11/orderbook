@@ -9,7 +9,7 @@ enum class OType { MKT, LMT };
 struct Order {
     char side;
     OType o_type;
-    float_t price; 
+    std::optional<float_t> price; 
     std::uint16_t qty;
     std::chrono::system_clock::time_point ts;
     
