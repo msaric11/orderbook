@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/Users/milan/dev/learning_c/orderbook/bin/program'
-relocations:     []
-...
